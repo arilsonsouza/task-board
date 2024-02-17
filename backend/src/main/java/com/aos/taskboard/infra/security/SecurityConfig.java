@@ -36,7 +36,6 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/signin").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/v1/auth/products").hasRole("USER")
             .anyRequest().authenticated())
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
