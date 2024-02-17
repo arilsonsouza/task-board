@@ -1,0 +1,26 @@
+version: "3.5"
+
+services:
+  db:
+    image: postgres:13-alpine
+    hostname: db
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=task_board
+      - PGDATA= /data/postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/data/postgres
+  adminer:
+    image: adminer
+    ports:
+      - 9000:8080
+networks:
+  default:
+    driver: bridge
+    name: task_board
+
+volumes:
+  postgres:

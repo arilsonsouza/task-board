@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+
+cors:
+  allowed-origins: "*"
+  allowed-methods: "*"
+  allowed-headers: "*"
+  exposed-headers: "*"
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/task_board
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+# Hibernate ddl auto (create, create-drop, validate, update)
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+      show-sql: true
+
+taskboard:
+  app:
+    jwt_issuer: task-board-api
+    jwt_secret: hqS6RGmay6URl00U01CZEad1wD/2dTQA/FQBwfYlDe2jDBCc7Wp7dPQGDkm/YEh+
+    jwt_expiration_in_minutes: 120
