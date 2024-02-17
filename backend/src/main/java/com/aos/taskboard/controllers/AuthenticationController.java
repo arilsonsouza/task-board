@@ -8,13 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aos.taskboard.controllers.exceptions.ResourceNotFoundException;
 import com.aos.taskboard.domain.user.ERole;
 import com.aos.taskboard.domain.user.Role;
 import com.aos.taskboard.domain.user.User;
@@ -23,8 +21,8 @@ import com.aos.taskboard.domain.user.DTO.AuthenticationResponseDTO;
 import com.aos.taskboard.domain.user.DTO.RegisterDTO;
 import com.aos.taskboard.domain.user.DTO.UserDTO;
 import com.aos.taskboard.infra.security.JwtTokenService;
-import com.aos.taskboard.repositories.RoleRepository;
-import com.aos.taskboard.repositories.UserRepository;
+import com.aos.taskboard.services.RoleService;
+import com.aos.taskboard.services.UserService;
 
 import jakarta.validation.Valid;
 
@@ -39,10 +37,10 @@ public class AuthenticationController {
   PasswordEncoder encoder;
 
   @Autowired
-  private UserRepository userRepository;
+  private UserService userService;
 
   @Autowired
-  private RoleRepository roleRepository;
+  private RoleService roleService;
 
   @Autowired
   private JwtTokenService jwtTokenService;
@@ -64,21 +62,20 @@ public class AuthenticationController {
 
   @PostMapping("/signup")
   public ResponseEntity<Object> signIn(@RequestBody @Valid RegisterDTO data) {
-    if (this.userRepository.existsByEmailOrUsername(data.email(), data.username())) {
+    if (userService.existsByEmailOrUsername(data.email(), data.username())) {
       return ResponseEntity.badRequest().build();
     }
 
     String encryptedPassword = encoder.encode(data.password());
 
     Set<Role> roles = new HashSet<>();
-    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+    Role userRole = roleService.findByName(ERole.ROLE_USER);
 
     roles.add(userRole);
 
     User newUser = new User(data.username(), data.email(), encryptedPassword, roles);
 
-    userRepository.save(newUser);
+    userService.save(newUser);
     return ResponseEntity.ok().build();
   }
 }
