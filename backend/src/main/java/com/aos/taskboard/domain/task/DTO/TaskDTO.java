@@ -10,6 +10,6 @@ public record TaskDTO(
 
   public TaskDTO(Task task) {
     this(task.getId(), task.getUser().getId(), task.getTitle(), task.getDescription(), task.getStatus().name(),
-        task.getDescription());
+        task.getIcon());
   }
 }
