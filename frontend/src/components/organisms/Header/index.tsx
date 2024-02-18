@@ -1,11 +1,16 @@
 import { Logo } from "../../atoms/Logo";
-import { HeaderContainer } from "./styles";
+import { PencilIcon } from "../../atoms/PencilIcon";
+import { HeaderDescription, HeaderTitle } from "./styles";
 
 export function Header() {
   return (
-    <HeaderContainer className="flex">
+    <header className="flex items-start py-6 gap-2">
       <Logo />
-      <h1>Task Board</h1>
-    </HeaderContainer>
+      <div className="flex flex-col gap-2">
+        <HeaderTitle>My Task Board</HeaderTitle>
+        <HeaderDescription>Tasks to keep organised</HeaderDescription>
+      </div>
+      <PencilIcon />
+    </header>
   )
 }
