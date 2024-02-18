@@ -10,7 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.aos.taskboard.repositories.UserRepository;
+import com.aos.taskboard.services.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,10 +20,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
   @Autowired
-  JwtTokenService jwtTokenService;
+  private JwtTokenService jwtTokenService;
 
   @Autowired
-  UserRepository userRepository;
+  private UserService userService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -40,7 +40,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     if (subject != null &&
         SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails user = userRepository.findByEmail(subject).get();
+      UserDetails user = userService.findByEmail(subject);
 
       var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

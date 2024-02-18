@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
   @Autowired
-  SecurityFilter securityFilter;
+  private SecurityFilter securityFilter;
 
   @Autowired
   @Qualifier("delegatedAuthEntryPoint")
@@ -36,6 +36,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/signin").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
+            .requestMatchers("/api/v1/tasks/**").hasAnyRole("ADMIN", "USER")
             .anyRequest().authenticated())
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
