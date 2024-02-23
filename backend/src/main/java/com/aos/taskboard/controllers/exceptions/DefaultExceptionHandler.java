@@ -13,52 +13,59 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.aos.taskboard.controllers.ApiResponseDTO;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class DefaultExceptionHandler {
 
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<ApiError> handleException(ResourceNotFoundException e,
+  public ResponseEntity<ApiResponseDTO> handleException(ResourceNotFoundException e,
       HttpServletRequest request) {
-    ApiError apiError = new ApiError(
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
         request.getRequestURI(),
-        e.getMessage(),
         HttpStatus.NOT_FOUND.value(),
-        LocalDateTime.now(),
-        null);
+        e.getMessage(),
+        false,
+        null,
+        LocalDateTime.now());
 
-    return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(InsufficientAuthenticationException.class)
-  public ResponseEntity<ApiError> handleException(InsufficientAuthenticationException e,
+  public ResponseEntity<ApiResponseDTO> handleException(InsufficientAuthenticationException e,
       HttpServletRequest request) {
-    ApiError apiError = new ApiError(
-        request.getRequestURI(),
-        e.getMessage(),
-        HttpStatus.FORBIDDEN.value(),
-        LocalDateTime.now(),
-        null);
 
-    return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.FORBIDDEN.value(),
+        e.getMessage(),
+        false,
+        null,
+        LocalDateTime.now());
+
+    return new ResponseEntity<>(apiResponse, HttpStatus.FORBIDDEN);
   }
 
   @ExceptionHandler(BadCredentialsException.class)
-  public ResponseEntity<ApiError> handleException(BadCredentialsException e,
+  public ResponseEntity<ApiResponseDTO> handleException(BadCredentialsException e,
       HttpServletRequest request) {
-    ApiError apiError = new ApiError(
-        request.getRequestURI(),
-        e.getMessage(),
-        HttpStatus.UNAUTHORIZED.value(),
-        LocalDateTime.now(),
-        null);
 
-    return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.UNAUTHORIZED.value(),
+        e.getMessage(),
+        false,
+        null,
+        LocalDateTime.now());
+
+    return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<Object> handleValidationExceptions(
+  public ResponseEntity<ApiResponseDTO> handleValidationExceptions(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
     Map<String, String> errors = new HashMap<>();
 
@@ -68,27 +75,30 @@ public class DefaultExceptionHandler {
       errors.put(fieldName, errorMessage);
     });
 
-    ApiError apiError = new ApiError(
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
         request.getRequestURI(),
-        "Invalid request",
-        HttpStatus.BAD_REQUEST.value(),
-        LocalDateTime.now(),
-        errors);
+        HttpStatus.UNPROCESSABLE_ENTITY.value(),
+        "Request contains invalid fields",
+        false,
+        new ErrorResponseDTO(errors),
+        LocalDateTime.now());
 
-    return ResponseEntity.badRequest().body(apiError);
+    return ResponseEntity.unprocessableEntity().body(apiResponse);
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiError> handleException(Exception e,
+  public ResponseEntity<ApiResponseDTO> handleException(Exception e,
       HttpServletRequest request) {
-    ApiError apiError = new ApiError(
-        request.getRequestURI(),
-        e.getMessage(),
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        LocalDateTime.now(),
-        null);
 
-    return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.UNPROCESSABLE_ENTITY.value(),
+        e.getMessage(),
+        false,
+        null,
+        LocalDateTime.now());
+
+    return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
 }
