@@ -6,7 +6,7 @@ import { Header } from "../../organisms/Header";
 export function DefaultLayout() {
   return (
     <div className="h-screen">
-      <LayoutContainer className="h-full flex flex-col gap-6">
+      <LayoutContainer className="h-full flex flex-col">
         <Header />
         <main className="h-full">
           <Outlet />
