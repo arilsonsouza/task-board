@@ -1,7 +1,9 @@
 package com.aos.taskboard.controllers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aos.taskboard.domain.task.DTO.TaskRequestDTO;
-import com.aos.taskboard.domain.task.DTO.TaskDTO;
+import com.aos.taskboard.domain.task.DTO.TaskResponseDTO;
+import com.aos.taskboard.domain.task.DTO.TasksDTO;
 import com.aos.taskboard.domain.user.User;
 import com.aos.taskboard.services.TaskService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -28,29 +32,65 @@ public class TaskController {
   private TaskService taskService;
 
   @GetMapping
-  public ResponseEntity<Object> listAllTasks(@AuthenticationPrincipal User user) {
-    List<TaskDTO> tasks = taskService.listAllTasksByUser(user);
+  public ResponseEntity<ApiResponseDTO> listAllTasks(@AuthenticationPrincipal User user, HttpServletRequest request) {
+    TasksDTO tasks = taskService.listAllTasksByUser(user);
 
-    return ResponseEntity.ok().body(tasks);
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.OK.value(),
+        null,
+        true,
+        tasks,
+        LocalDateTime.now());
+
+    return ResponseEntity.ok().body(apiResponse);
   }
 
   @PostMapping
-  public ResponseEntity<Object> createTask(@AuthenticationPrincipal User user,
-      @RequestBody @Valid TaskRequestDTO data) {
-    TaskDTO task = taskService.createTask(user, data);
-    return ResponseEntity.ok().body(task);
+  public ResponseEntity<ApiResponseDTO> createTask(@AuthenticationPrincipal User user,
+      @RequestBody @Valid TaskRequestDTO data, HttpServletRequest request) {
+    TaskResponseDTO task = taskService.createTask(user, data);
+
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.CREATED.value(),
+        "Task has been created",
+        true,
+        task,
+        LocalDateTime.now());
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateTask(@AuthenticationPrincipal User user, @PathVariable Long id,
-      @RequestBody @Valid TaskRequestDTO data) {
-    TaskDTO task = taskService.updateTask(user, id, data);
-    return ResponseEntity.ok().body(task);
+      @RequestBody @Valid TaskRequestDTO data, HttpServletRequest request) {
+    TaskResponseDTO task = taskService.updateTask(user, id, data);
+
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.OK.value(),
+        "Task has been updated",
+        true,
+        task,
+        LocalDateTime.now());
+
+    return ResponseEntity.ok().body(apiResponse);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Object> updateTask(@AuthenticationPrincipal User user, @PathVariable Long id) {
-    taskService.deleteTask(user, id);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<ApiResponseDTO> updateTask(@AuthenticationPrincipal User user, @PathVariable Long id,
+      HttpServletRequest request) {
+    TaskResponseDTO task = taskService.deleteTask(user, id);
+
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.OK.value(),
+        "Task has been deleted",
+        true,
+        task,
+        LocalDateTime.now());
+
+    return ResponseEntity.ok().body(apiResponse);
   }
 }

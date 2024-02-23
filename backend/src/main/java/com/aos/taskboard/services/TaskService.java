@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.aos.taskboard.controllers.exceptions.ResourceNotFoundException;
 import com.aos.taskboard.domain.task.Task;
 import com.aos.taskboard.domain.task.DTO.TaskRequestDTO;
+import com.aos.taskboard.domain.task.DTO.TaskResponseDTO;
+import com.aos.taskboard.domain.task.DTO.TasksDTO;
 import com.aos.taskboard.domain.task.DTO.TaskDTO;
 import com.aos.taskboard.domain.user.User;
 import com.aos.taskboard.repositories.TaskRepository;
@@ -19,13 +21,15 @@ public class TaskService {
   @Autowired
   private TaskRepository taskRepository;
 
-  public List<TaskDTO> listAllTasksByUser(User user) {
+  public TasksDTO listAllTasksByUser(User user) {
     List<Task> tasks = taskRepository.findAllByUserId(user.getId());
 
-    return tasks.stream().map(TaskDTO::new).collect(Collectors.toList());
+    List<TaskDTO> tasksResult = tasks.stream().map(TaskDTO::new).collect(Collectors.toList());
+
+    return new TasksDTO(tasksResult);
   }
 
-  public TaskDTO createTask(User user, TaskRequestDTO data) {
+  public TaskResponseDTO createTask(User user, TaskRequestDTO data) {
     Task task = Task.builder()
         .user(user)
         .title(data.title())
@@ -35,10 +39,10 @@ public class TaskService {
         .build();
 
     taskRepository.saveAndFlush(task);
-    return new TaskDTO(task);
+    return new TaskResponseDTO(task);
   }
 
-  public TaskDTO updateTask(User user, Long taskId, TaskRequestDTO data) {
+  public TaskResponseDTO updateTask(User user, Long taskId, TaskRequestDTO data) {
     Task task = taskRepository.findByIdAndUserId(taskId, user.getId())
         .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
@@ -48,13 +52,14 @@ public class TaskService {
     task.setIcon(data.icon());
 
     taskRepository.saveAndFlush(task);
-    return new TaskDTO(task);
+    return new TaskResponseDTO(task);
   }
 
-  public void deleteTask(User user, Long taskId) {
+  public TaskResponseDTO deleteTask(User user, Long taskId) {
     Task task = taskRepository.findByIdAndUserId(taskId, user.getId())
         .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
     taskRepository.delete(task);
+    return new TaskResponseDTO(task);
   }
 }

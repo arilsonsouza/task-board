@@ -1,10 +1,9 @@
 package com.aos.taskboard.domain.task.DTO;
 
 import com.aos.taskboard.domain.task.Task;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record TaskDTO(
-    Long id, @JsonProperty("user_id") Long userId, String title,
+    Long id, Long userId, String title,
     String description, String status,
     String icon) {
 
