@@ -6,28 +6,37 @@ import Button from "../../atoms/Button";
 import { Link } from "../../atoms/Link";
 import { FormField } from "../../molecules/FormField";
 
-const loginFormSchema = z.object({
+const SignUpFormSchema = z.object({
   email: z.string().trim().min(1, { message: 'Email is required' }).email({ message: "Invalid email address" }),
+  username: z.string().trim()
+    .min(3, { message: 'Username must be at least 3 characters' })
+    .max(20, { message: "Username must not be longer than 20 characters" }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+  confirmPassword: z.string().min(8, { message: 'Password must be at least 8 characters' }),
 })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: "Oops! Password doesnt match",
+  });
 
-type LoginFormInputs = z.infer<typeof loginFormSchema>
+type SignUpFormInputs = z.infer<typeof SignUpFormSchema>
 
-export function LoginForm() {
+export function SignUpForm() {
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
     reset,
-  } = useForm<LoginFormInputs>({
-    resolver: zodResolver(loginFormSchema),
+  } = useForm<SignUpFormInputs>({
+    resolver: zodResolver(SignUpFormSchema),
   })
 
-  async function handleFormLoginSubmit(data: LoginFormInputs) {
+  async function handleFormLoginSubmit(data: SignUpFormInputs) {
     setTimeout(() => {
       console.log(data)
       reset()
     }, 2000);
+
   }
 
   return (
@@ -45,6 +54,15 @@ export function LoginForm() {
       />
 
       <FormField
+        label="Usernmae"
+        type="text"
+        placeholder="Username"
+        required
+        {...register('username')}
+        error={errors.username?.message}
+      />
+
+      <FormField
         label="Password"
         type="password"
         placeholder="********"
@@ -53,9 +71,18 @@ export function LoginForm() {
         error={errors.password?.message}
       />
 
+      <FormField
+        label="Confirm Password"
+        type="password"
+        placeholder="********"
+        required
+        {...register('confirmPassword')}
+        error={errors.confirmPassword?.message}
+      />
+
       <div className="flex justify-end">
-        <Link to={"/signup"} className="text-base">
-          Sign Up
+        <Link to={"/"} className="text-base">
+          Sign In
         </Link>
       </div>
 
@@ -65,7 +92,7 @@ export function LoginForm() {
         variant="default"
         disabled={isSubmitting}
       >
-        Login
+        Sign Up
       </Button>
     </form>
   )
