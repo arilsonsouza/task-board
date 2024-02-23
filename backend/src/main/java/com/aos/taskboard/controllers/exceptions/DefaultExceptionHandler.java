@@ -56,7 +56,7 @@ public class DefaultExceptionHandler {
     ApiResponseDTO apiResponse = new ApiResponseDTO(
         request.getRequestURI(),
         HttpStatus.UNAUTHORIZED.value(),
-        e.getMessage(),
+        "Invalid email or password",
         false,
         null,
         LocalDateTime.now());
