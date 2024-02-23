@@ -1,9 +1,11 @@
 package com.aos.taskboard.controllers;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,7 @@ import com.aos.taskboard.infra.security.JwtTokenService;
 import com.aos.taskboard.services.RoleService;
 import com.aos.taskboard.services.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -46,7 +49,8 @@ public class AuthenticationController {
   private JwtTokenService jwtTokenService;
 
   @PostMapping("/signin")
-  public ResponseEntity<Object> signIn(@RequestBody @Valid AuthenticationRequestDTO data) {
+  public ResponseEntity<ApiResponseDTO> signIn(@RequestBody @Valid AuthenticationRequestDTO data,
+      HttpServletRequest request) {
     var usernamePasswod = new UsernamePasswordAuthenticationToken(data.email(),
         data.password());
     var auth = this.authenticationManager.authenticate(usernamePasswod);
@@ -57,13 +61,28 @@ public class AuthenticationController {
 
     AuthenticationResponseDTO responseDTO = new AuthenticationResponseDTO(jwtToken, "Bearer", new UserDTO(user));
 
-    return ResponseEntity.ok().body(responseDTO);
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.OK.value(),
+        "User logged successfully",
+        true,
+        responseDTO,
+        LocalDateTime.now());
+
+    return ResponseEntity.ok().body(apiResponse);
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<Object> signIn(@RequestBody @Valid RegisterDTO data) {
+  public ResponseEntity<ApiResponseDTO> signIn(@RequestBody @Valid RegisterDTO data, HttpServletRequest request) {
     if (userService.existsByEmailOrUsername(data.email(), data.username())) {
-      return ResponseEntity.badRequest().build();
+      ApiResponseDTO apiResponse = new ApiResponseDTO(
+          request.getRequestURI(),
+          HttpStatus.BAD_REQUEST.value(),
+          "User already exists",
+          false,
+          null,
+          LocalDateTime.now());
+      return ResponseEntity.badRequest().body(apiResponse);
     }
 
     String encryptedPassword = encoder.encode(data.password());
@@ -76,6 +95,15 @@ public class AuthenticationController {
     User newUser = new User(data.username(), data.email(), encryptedPassword, roles);
 
     userService.save(newUser);
-    return ResponseEntity.ok().build();
+
+    ApiResponseDTO apiResponse = new ApiResponseDTO(
+        request.getRequestURI(),
+        HttpStatus.OK.value(),
+        "User registered successfully",
+        true,
+        null,
+        LocalDateTime.now());
+
+    return ResponseEntity.ok().body(apiResponse);
   }
 }
