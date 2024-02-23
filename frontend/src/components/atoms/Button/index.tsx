@@ -4,7 +4,7 @@ import { CustomButton } from "./styles";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "default"
+  variant?: "default";
 }
 
 export default function Button({ children, className, variant, ...attributes }: ButtonProps) {
