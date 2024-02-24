@@ -15,5 +15,12 @@ export const CustomButton = styled.button<ButtonProps>`
       &:hover {
         background-color: ${theme.colors.caramelGold};
       }
+
+      &:disabled {
+        opacity: 0.6;
+        color: ${theme.colors.white};
+        background-color: ${theme.colors.caramelGold};
+        cursor: not-allowed;
+      }
     `}
 `
