@@ -1,4 +1,5 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 import { createContext } from "use-context-selector";
 
 export type Notification = {
@@ -7,7 +8,6 @@ export type Notification = {
 }
 
 type NotifcationContextType = {
-  notification: Notification,
   setNotification: (notification: Notification) => void
 }
 
@@ -20,11 +20,32 @@ export const NotificationContext = createContext({} as NotifcationContextType)
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const [notification, setNotification] = useState<Notification>({} as Notification)
 
+  useEffect(() => {
+    const { message, type } = notification
+    if (message && message !== "") {
+      toast(message, { type: type });
+    }
+
+  }, [notification])
+
   return (
     <NotificationContext.Provider
-      value={{ notification, setNotification }}
+      value={{ setNotification }}
     >
       {children}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </NotificationContext.Provider>
   )
 }

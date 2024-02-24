@@ -4,7 +4,9 @@ import { defaultTheme } from "./styles/themes/default"
 import { GlobalStyle } from "./styles/global"
 import { Router } from "./Router"
 import { NotificationProvider } from "./contexts/NotificationContext"
-import { Notification } from "./components/organisms/Notification"
+import { AuthProvider } from "./contexts/AuthContext"
+
+import 'react-toastify/dist/ReactToastify.min.css';
 
 function App() {
   return (
@@ -12,8 +14,9 @@ function App() {
       <GlobalStyle />
       <BrowserRouter>
         <NotificationProvider>
-          <Router></Router>
-          <Notification />
+          <AuthProvider>
+            <Router></Router>
+          </AuthProvider>
         </NotificationProvider>
       </BrowserRouter>
     </ThemeProvider>
