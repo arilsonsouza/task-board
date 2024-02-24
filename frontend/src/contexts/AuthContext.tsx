@@ -24,23 +24,23 @@ export type UserType = {
 
 export type AuthUserType = {
   accessToken: string;
-  tokenType: string,
+  tokenType: string;
   user: UserType
 }
 
 type AuthContextType = {
-  authUser: AuthUserType,
-  signIn: (data: signInData) => Promise<boolean>
+  authUser: AuthUserType;
+  signIn: (data: signInData) => Promise<boolean>;
   signUp: (data: signUpData) => Promise<boolean>
 }
 
-type NotificationProviderProps = {
+type AuthProviderProps = {
   children: ReactNode
 }
 
 export const AuthContext = createContext({} as AuthContextType)
 
-export function AuthProvider({ children }: NotificationProviderProps) {
+export function AuthProvider({ children }: AuthProviderProps) {
   const setNotification = useContextSelector(NotificationContext, (context) => {
     return context.setNotification
   })

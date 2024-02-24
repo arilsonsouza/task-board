@@ -7,6 +7,7 @@ import Button from "../../atoms/Button";
 import { Link } from "../../atoms/Link";
 import { FormField } from "../../molecules/FormField";
 import { AuthContext } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const loginFormSchema = z.object({
   email: z.string().trim().min(1, { message: 'Email is required' }).email({ message: "Invalid email address" }),
@@ -16,6 +17,7 @@ const loginFormSchema = z.object({
 type LoginFormInputs = z.infer<typeof loginFormSchema>
 
 export function LoginForm() {
+  const navigate = useNavigate();
   const signIn = useContextSelector(AuthContext, (context) => {
     return context.signIn
   })
@@ -33,6 +35,7 @@ export function LoginForm() {
     const success = await signIn(formData)
     if (success) {
       reset()
+      navigate('/tasks')
     }
   }
 
