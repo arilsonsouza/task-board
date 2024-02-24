@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
+import { AUTH_STORE_KEY } from '../constans'
 
 export const DEFAULT_MESSAGE = {
   SUCCESS: 'Action taken',
@@ -58,6 +59,18 @@ const handleError = (err: any, MESSAGE = DEFAULT_MESSAGE.ERROR_000) => {
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 })
+
+api.interceptors.request.use(config => {
+  const authTokenJSON = localStorage.getItem(AUTH_STORE_KEY);
+
+  if (authTokenJSON) {
+    const auth =  JSON.parse(authTokenJSON)
+    if (auth.accessToken) {
+      config.headers.Authorization = `Bearer ${auth.accessToken}`;
+    }
+  }
+  return config;
+});
 
 api.interceptors.response.use(handleSuccess, handleError);
 
