@@ -1,10 +1,9 @@
 import { TaskType } from "../../../contexts/TasksContext"
 import { Icon } from "../../atoms/Icon"
 import { TaskCardWrapper } from "./styles"
-
-import inProgressIcon from '../../../assets/images/Time_atack_duotone.svg'
-import completedIcon from '../../../assets/images/Done_round_duotone.svg'
-import canceledIcon from '../../../assets/images/close_ring_duotone.svg'
+import { InProgressTaskIcon } from "../../atoms/InProgressTaskIcon"
+import { CompletedTaskIcon } from "../../atoms/CompletedTaskIcon"
+import { CanceledTaskIcon } from "../../atoms/CanceledTaskIcon"
 
 type TaskCardProps = {
   task: TaskType
@@ -12,8 +11,7 @@ type TaskCardProps = {
 
 type TaskStatusOption = {
   status: "in_progress" | "completed" | "canceled"
-  variant: "info" | "success" | "error";
-  icon: string
+  icon: JSX.Element
 }
 
 type TaskStatusOptionsProps = {
@@ -26,18 +24,15 @@ export function TaskCard({ task: { title, status, icon } }: TaskCardProps) {
   const taskStatusOptions: TaskStatusOptionsProps = {
     "IN_PROGRESS": {
       status: "in_progress",
-      variant: "info",
-      icon: inProgressIcon
+      icon: <InProgressTaskIcon />
     },
     "COMPLETED": {
       status: "completed",
-      variant: "success",
-      icon: completedIcon
+      icon: <CompletedTaskIcon />
     },
     "CANCELED": {
       status: "canceled",
-      variant: "error",
-      icon: canceledIcon
+      icon: <CanceledTaskIcon />
     }
   }
 
@@ -54,9 +49,7 @@ export function TaskCard({ task: { title, status, icon } }: TaskCardProps) {
         </Icon>
         <h2 className="text-lg font-semibold">{title}</h2>
       </div>
-      <Icon variant={taskStatus.variant}>
-        <img src={taskStatus.icon} alt={title} />
-      </Icon>
+      {taskStatus.icon}
     </TaskCardWrapper>
   )
 }
