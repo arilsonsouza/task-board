@@ -24,11 +24,16 @@ import com.aos.taskboard.infra.security.JwtTokenService;
 import com.aos.taskboard.services.RoleService;
 import com.aos.taskboard.services.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "User", description = "User authentication")
 public class AuthenticationController {
 
   @Autowired
@@ -47,6 +52,10 @@ public class AuthenticationController {
   private JwtTokenService jwtTokenService;
 
   @PostMapping("/signin")
+  @Operation(summary = "Sign In", description = "User sign in route")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
+  })
   public ResponseEntity<ApiResponseDTO<AuthenticationResponseDTO>> signIn(
       @RequestBody @Valid AuthenticationRequestDTO data,
       HttpServletRequest request) {
@@ -67,11 +76,15 @@ public class AuthenticationController {
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResponseDTO<Object>> signIn(@RequestBody @Valid RegisterDTO data,
+  @Operation(summary = "Sign Up", description = "User sign up route")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
+  })
+  public ResponseEntity<ApiResponseDTO<?>> signUp(@RequestBody @Valid RegisterDTO data,
       HttpServletRequest request) {
     if (userService.existsByEmailOrUsername(data.email(), data.username())) {
 
-      ApiResponseDTO<Object> apiResponse = ApiResponseDTO.error(null, "User already exists");
+      ApiResponseDTO<?> apiResponse = ApiResponseDTO.error(null, "User already exists");
 
       return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -87,7 +100,7 @@ public class AuthenticationController {
 
     userService.save(newUser);
 
-    ApiResponseDTO<Object> apiResponse = ApiResponseDTO.success(null, "User registered successfully");
+    ApiResponseDTO<?> apiResponse = ApiResponseDTO.success(null, "User registered successfully");
 
     return ResponseEntity.ok().body(apiResponse);
   }

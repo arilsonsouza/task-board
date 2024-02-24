@@ -19,16 +19,27 @@ import com.aos.taskboard.domain.task.DTO.TasksDTO;
 import com.aos.taskboard.domain.user.User;
 import com.aos.taskboard.services.TaskService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/tasks")
+@Tag(name = "Task", description = "Tasks")
 public class TaskController {
 
   @Autowired
   private TaskService taskService;
 
   @GetMapping
+  @Operation(summary = "Get tasks", description = "Get all user tasks")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
+  })
+  @SecurityRequirement(name = "jwt_auth")
   public ResponseEntity<ApiResponseDTO<TasksDTO>> listAllTasks(@AuthenticationPrincipal User user) {
     TasksDTO tasks = taskService.listAllTasksByUser(user);
 
@@ -38,6 +49,10 @@ public class TaskController {
   }
 
   @PostMapping
+  @Operation(summary = "Create task", description = "Create an user task")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
+  })
   public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> createTask(@AuthenticationPrincipal User user,
       @RequestBody @Valid TaskRequestDTO data) {
     TaskResponseDTO task = taskService.createTask(user, data);
@@ -47,6 +62,10 @@ public class TaskController {
   }
 
   @PutMapping("/{id}")
+  @Operation(summary = "Update task", description = "Update an user task")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
+  })
   public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> updateTask(@AuthenticationPrincipal User user,
       @PathVariable Long id,
       @RequestBody @Valid TaskRequestDTO data) {
@@ -57,7 +76,11 @@ public class TaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> updateTask(@AuthenticationPrincipal User user,
+  @Operation(summary = "Delete task", description = "Delete an user task")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
+  })
+  public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> deleteTask(@AuthenticationPrincipal User user,
       @PathVariable Long id) {
     TaskResponseDTO task = taskService.deleteTask(user, id);
 

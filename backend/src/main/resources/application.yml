@@ -33,3 +33,5 @@ taskboard:
     jwt_issuer: task-board-api
     jwt_secret: hqS6RGmay6URl00U01CZEad1wD/2dTQA/FQBwfYlDe2jDBCc7Wp7dPQGDkm/YEh+
     jwt_expiration_in_minutes: 120
+
+springdoc.packages-to-scan: com.aos.taskboard.controllers
