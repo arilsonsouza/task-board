@@ -16,9 +16,9 @@ const loginFormSchema = z.object({
 type LoginFormInputs = z.infer<typeof loginFormSchema>
 
 export function LoginForm() {
-  const { login } = useContextSelector(AuthContext, (context) => {
+  const { signIn } = useContextSelector(AuthContext, (context) => {
     return {
-      login: context.login
+      signIn: context.signIn
     }
   })
 
@@ -32,7 +32,7 @@ export function LoginForm() {
   })
 
   async function handleFormLoginSubmit(formData: LoginFormInputs) {
-    const success = await login(formData)
+    const success = await signIn(formData)
     if (success) {
       reset()
     }

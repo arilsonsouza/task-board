@@ -11,8 +11,8 @@ const SignUpFormSchema = z.object({
   username: z.string().trim()
     .min(3, { message: 'Username must be at least 3 characters' })
     .max(20, { message: "Username must not be longer than 20 characters" }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
-  confirmPassword: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 })
   .refine((data) => data.password === data.confirmPassword, {
     path: ['confirmPassword'],

@@ -1,7 +1,8 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 import { NotificationContext } from "./NotificationContext";
 import { api } from "../lib/axios";
+import { AUTH_STORE_KEY } from "../constans";
 
 type loginData = {
   email: string;
@@ -23,7 +24,7 @@ export type AuthUserType = {
 
 type AuthContextType = {
   authUser: AuthUserType,
-  login: (data: loginData) => Promise<boolean>
+  signIn: (data: loginData) => Promise<boolean>
 }
 
 type NotificationProviderProps = {
@@ -39,7 +40,14 @@ export function AuthProvider({ children }: NotificationProviderProps) {
 
   const [authUser, setAuthUser] = useState<AuthUserType>({} as AuthUserType)
 
-  async function login(formData: loginData): Promise<boolean> {
+  useEffect(() => {
+    if (authUser.accessToken) {
+      const authUserJSON = JSON.stringify(authUser)
+      localStorage.setItem(AUTH_STORE_KEY, authUserJSON)
+    }
+  }, [authUser])
+
+  async function signIn(formData: loginData): Promise<boolean> {
     const { data } = await api.post("/auth/signin", formData)
     const { success, message } = data;
 
@@ -60,7 +68,7 @@ export function AuthProvider({ children }: NotificationProviderProps) {
 
   return (
     <AuthContext.Provider
-      value={{ authUser, login }}
+      value={{ authUser, signIn }}
     >
       {children}
     </AuthContext.Provider>
