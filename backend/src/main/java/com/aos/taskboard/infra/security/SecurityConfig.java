@@ -50,7 +50,10 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/signin").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
             .requestMatchers("/api/v1/tasks/**").hasAnyRole("ADMIN", "USER")
-            .anyRequest().authenticated())
+            .anyRequest()
+            .authenticated())
+        .exceptionHandling(
+            ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
