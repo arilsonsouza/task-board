@@ -1,11 +1,9 @@
 package com.aos.taskboard.controllers;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,7 +47,8 @@ public class AuthenticationController {
   private JwtTokenService jwtTokenService;
 
   @PostMapping("/signin")
-  public ResponseEntity<ApiResponseDTO> signIn(@RequestBody @Valid AuthenticationRequestDTO data,
+  public ResponseEntity<ApiResponseDTO<AuthenticationResponseDTO>> signIn(
+      @RequestBody @Valid AuthenticationRequestDTO data,
       HttpServletRequest request) {
     var usernamePasswod = new UsernamePasswordAuthenticationToken(data.email(),
         data.password());
@@ -61,27 +60,19 @@ public class AuthenticationController {
 
     AuthenticationResponseDTO responseDTO = new AuthenticationResponseDTO(jwtToken, "Bearer", new UserDTO(user));
 
-    ApiResponseDTO apiResponse = new ApiResponseDTO(
-        request.getRequestURI(),
-        HttpStatus.OK.value(),
-        "User logged successfully",
-        true,
-        responseDTO,
-        LocalDateTime.now());
+    ApiResponseDTO<AuthenticationResponseDTO> apiResponse = ApiResponseDTO.success(responseDTO,
+        "User logged successfully");
 
     return ResponseEntity.ok().body(apiResponse);
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResponseDTO> signIn(@RequestBody @Valid RegisterDTO data, HttpServletRequest request) {
+  public ResponseEntity<ApiResponseDTO<Object>> signIn(@RequestBody @Valid RegisterDTO data,
+      HttpServletRequest request) {
     if (userService.existsByEmailOrUsername(data.email(), data.username())) {
-      ApiResponseDTO apiResponse = new ApiResponseDTO(
-          request.getRequestURI(),
-          HttpStatus.BAD_REQUEST.value(),
-          "User already exists",
-          false,
-          null,
-          LocalDateTime.now());
+
+      ApiResponseDTO<Object> apiResponse = ApiResponseDTO.error(null, "User already exists");
+
       return ResponseEntity.badRequest().body(apiResponse);
     }
 
@@ -96,13 +87,7 @@ public class AuthenticationController {
 
     userService.save(newUser);
 
-    ApiResponseDTO apiResponse = new ApiResponseDTO(
-        request.getRequestURI(),
-        HttpStatus.OK.value(),
-        "User registered successfully",
-        true,
-        null,
-        LocalDateTime.now());
+    ApiResponseDTO<Object> apiResponse = ApiResponseDTO.success(null, "User registered successfully");
 
     return ResponseEntity.ok().body(apiResponse);
   }
