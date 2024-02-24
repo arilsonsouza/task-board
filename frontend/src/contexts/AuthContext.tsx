@@ -4,8 +4,14 @@ import { NotificationContext } from "./NotificationContext";
 import { api } from "../lib/axios";
 import { AUTH_STORE_KEY } from "../constans";
 
-type loginData = {
+type signInData = {
   email: string;
+  password: string;
+}
+
+type signUpData = {
+  email: string;
+  username: string;
   password: string;
 }
 
@@ -24,7 +30,8 @@ export type AuthUserType = {
 
 type AuthContextType = {
   authUser: AuthUserType,
-  signIn: (data: loginData) => Promise<boolean>
+  signIn: (data: signInData) => Promise<boolean>
+  signUp: (data: signUpData) => Promise<boolean>
 }
 
 type NotificationProviderProps = {
@@ -47,11 +54,15 @@ export function AuthProvider({ children }: NotificationProviderProps) {
     }
   }, [authUser])
 
-  async function signIn(formData: loginData): Promise<boolean> {
+  function showNotification(success: boolean, message: string) {
+    const notificationType = success ? 'success' : 'error'
+    setNotification({ message: message, type: notificationType })
+  }
+
+  async function signIn(formData: signInData): Promise<boolean> {
     const { data } = await api.post("/auth/signin", formData)
     const { success, message } = data;
 
-    const notificationType = success ? 'success' : 'error'
     if (success) {
       const { accessToken, tokenType, user } = data
 
@@ -61,14 +72,21 @@ export function AuthProvider({ children }: NotificationProviderProps) {
         user
       })
     }
-    setNotification({ message: message, type: notificationType })
 
+    showNotification(success, message)
+    return success
+  }
+
+  async function signUp(formData: signUpData): Promise<boolean> {
+    const { data } = await api.post("/auth/signup", formData)
+    const { success, message } = data;
+    showNotification(success, message)
     return success
   }
 
   return (
     <AuthContext.Provider
-      value={{ authUser, signIn }}
+      value={{ authUser, signIn, signUp }}
     >
       {children}
     </AuthContext.Provider>

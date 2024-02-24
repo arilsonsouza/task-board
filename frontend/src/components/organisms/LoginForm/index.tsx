@@ -16,10 +16,8 @@ const loginFormSchema = z.object({
 type LoginFormInputs = z.infer<typeof loginFormSchema>
 
 export function LoginForm() {
-  const { signIn } = useContextSelector(AuthContext, (context) => {
-    return {
-      signIn: context.signIn
-    }
+  const signIn = useContextSelector(AuthContext, (context) => {
+    return context.signIn
   })
 
   const {

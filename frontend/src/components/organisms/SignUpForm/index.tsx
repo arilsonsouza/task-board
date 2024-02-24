@@ -5,14 +5,17 @@ import * as z from 'zod'
 import Button from "../../atoms/Button";
 import { Link } from "../../atoms/Link";
 import { FormField } from "../../molecules/FormField";
+import { useContextSelector } from "use-context-selector";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const SignUpFormSchema = z.object({
   email: z.string().trim().min(1, { message: 'Email is required' }).email({ message: "Invalid email address" }),
   username: z.string().trim()
     .min(3, { message: 'Username must be at least 3 characters' })
     .max(20, { message: "Username must not be longer than 20 characters" }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  password: z.string().trim().min(6, { message: 'Password must be at least 6 characters' }),
+  confirmPassword: z.string().trim().min(6, { message: 'Password must be at least 6 characters' }),
 })
   .refine((data) => data.password === data.confirmPassword, {
     path: ['confirmPassword'],
@@ -22,6 +25,7 @@ const SignUpFormSchema = z.object({
 type SignUpFormInputs = z.infer<typeof SignUpFormSchema>
 
 export function SignUpForm() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -31,12 +35,16 @@ export function SignUpForm() {
     resolver: zodResolver(SignUpFormSchema),
   })
 
-  async function handleFormLoginSubmit(data: SignUpFormInputs) {
-    setTimeout(() => {
-      console.log(data)
-      reset()
-    }, 2000);
+  const signUp = useContextSelector(AuthContext, (context) => {
+    return context.signUp
+  })
 
+  async function handleFormLoginSubmit({ email, username, password }: SignUpFormInputs) {
+    const success = await signUp({ email, username, password })
+    if (success) {
+      reset()
+      navigate('/')
+    }
   }
 
   return (
