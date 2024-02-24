@@ -1,19 +1,27 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useContextSelector } from "use-context-selector";
 import * as z from 'zod'
 
 import Button from "../../atoms/Button";
 import { Link } from "../../atoms/Link";
 import { FormField } from "../../molecules/FormField";
+import { AuthContext } from "../../../contexts/AuthContext";
 
 const loginFormSchema = z.object({
   email: z.string().trim().min(1, { message: 'Email is required' }).email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 })
 
 type LoginFormInputs = z.infer<typeof loginFormSchema>
 
 export function LoginForm() {
+  const { login } = useContextSelector(AuthContext, (context) => {
+    return {
+      login: context.login
+    }
+  })
+
   const {
     register,
     handleSubmit,
@@ -23,11 +31,11 @@ export function LoginForm() {
     resolver: zodResolver(loginFormSchema),
   })
 
-  async function handleFormLoginSubmit(data: LoginFormInputs) {
-    setTimeout(() => {
-      console.log(data)
+  async function handleFormLoginSubmit(formData: LoginFormInputs) {
+    const success = await login(formData)
+    if (success) {
       reset()
-    }, 2000);
+    }
   }
 
   return (
