@@ -1,16 +1,30 @@
 import { useContextSelector } from "use-context-selector"
-import { TaskType, TasksContext } from "../../../contexts/TasksContext"
+
+import { Icon } from "../../atoms/Icon"
 import { TaskCard } from "../../molecules/TaskCard"
+import { TaskForm } from "../TaskForm"
+import addTaskIcon from "../../../assets/images/Add_round_duotone.svg"
+import { TaskType, TasksContext } from "../../../contexts/TasksContext"
+import closeDrawerButtonIcon from '../../../assets/images/close_ring_duotone-1.svg'
+
+import { AddTaskButton, CloseDrawerButton } from "./styles"
 
 export function TasksList() {
-  const { tasks } = useContextSelector(TasksContext, (context) => {
+
+  const { tasks, resetTask, editTask } = useContextSelector(TasksContext, (context) => {
     return {
-      tasks: context.tasks
+      tasks: context.tasks,
+      resetTask: context.resetTask,
+      editTask: context.editTask,
     }
   })
 
   function updateTask(task: TaskType) {
-    console.log("updateTask", task)
+    editTask(task)
+  }
+
+  function resetSate() {
+    resetTask()
   }
 
   return (
@@ -32,14 +46,37 @@ export function TasksList() {
               )
             })}
           </div>
+          <AddTaskButton
+            htmlFor="tasks-board-drawer"
+            className="mt-4 btn btn-block flex justify-start drawer-button"
+            onClick={resetSate}
+          >
+            <Icon variant="info">
+              <img src={addTaskIcon} alt="Add task" />
+            </Icon>
+            <span>Add new task</span>
+          </AddTaskButton>
+
         </div>
         <div className="drawer-side">
-          <ul className="menu p-4 w-2/4 min-h-full bg-base-200 text-base-content">
-            <label htmlFor="tasks-board-drawer" aria-label="close sidebar" className="drawer-overlay">close</label>
-            {/* Sidebar content here */}
-            <li><a>Sidebar Item 1</a></li>
-            <li><a>Sidebar Item 2</a></li>
-          </ul>
+          <div className="menu p-4 w-2/4 min-h-full text-base-content bg-white rounded-2xl">
+            <div className="flex flex-col p-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Task details</h2>
+                <CloseDrawerButton
+                  htmlFor="tasks-board-drawer"
+                  aria-label="close sidebar"
+                  className="drawer-overlay p-2 rounded-lg"
+                  onClick={resetSate}
+                >
+                  <img src={closeDrawerButtonIcon} />
+                </CloseDrawerButton>
+              </div>
+              <div className="mt-1">
+                <TaskForm />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
