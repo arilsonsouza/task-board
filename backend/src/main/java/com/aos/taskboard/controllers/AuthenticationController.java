@@ -19,7 +19,6 @@ import com.aos.taskboard.domain.user.User;
 import com.aos.taskboard.domain.user.DTO.AuthenticationRequestDTO;
 import com.aos.taskboard.domain.user.DTO.AuthenticationResponseDTO;
 import com.aos.taskboard.domain.user.DTO.RegisterDTO;
-import com.aos.taskboard.domain.user.DTO.UserDTO;
 import com.aos.taskboard.infra.security.JwtTokenService;
 import com.aos.taskboard.services.RoleService;
 import com.aos.taskboard.services.UserService;
@@ -67,7 +66,7 @@ public class AuthenticationController {
 
     String jwtToken = jwtTokenService.generateToken(user);
 
-    AuthenticationResponseDTO responseDTO = new AuthenticationResponseDTO(jwtToken, "Bearer", new UserDTO(user));
+    AuthenticationResponseDTO responseDTO = new AuthenticationResponseDTO(jwtToken, "Bearer");
 
     ApiResponseDTO<AuthenticationResponseDTO> apiResponse = ApiResponseDTO.success(responseDTO,
         "User logged successfully");
@@ -80,8 +79,7 @@ public class AuthenticationController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
   })
-  public ResponseEntity<ApiResponseDTO<?>> signUp(@RequestBody @Valid RegisterDTO data,
-      HttpServletRequest request) {
+  public ResponseEntity<ApiResponseDTO<?>> signUp(@RequestBody @Valid RegisterDTO data) {
     if (userService.existsByEmailOrUsername(data.email(), data.username())) {
 
       ApiResponseDTO<?> apiResponse = ApiResponseDTO.error(null, "User already exists");
