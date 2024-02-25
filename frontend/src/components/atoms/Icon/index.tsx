@@ -8,7 +8,7 @@ type Props = {
 export function Icon({ children, variant = "default" }: Props) {
   return (
     <IconWrapper
-      className="flex justify-center items-center py-4 px-2 rounded-xl"
+      className="flex justify-center items-center py-3 px-2 rounded-xl"
       variant={variant}
     >
       {children}
