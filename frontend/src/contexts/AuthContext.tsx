@@ -3,6 +3,9 @@ import { createContext, useContextSelector } from "use-context-selector";
 import { NotificationContext } from "./NotificationContext";
 import { api } from "../lib/axios";
 import { AUTH_STORE_KEY } from "../constans";
+import { ApiResponse } from "../@types/apiResponse";
+import { getAuthCrendentialsFromLocal } from "../components/utils";
+import { useNavigate } from "react-router-dom";
 
 type signInData = {
   email: string;
@@ -22,16 +25,34 @@ export type UserType = {
   roles: string[]
 }
 
-export type AuthUserType = {
-  accessToken: string;
-  tokenType: string;
+type UserProfileResponseType = ApiResponse & {
   user: UserType
 }
 
+type UserProfileApiResponseType = {
+  data: UserProfileResponseType
+}
+
+export type AuthCrendential = {
+  accessToken: string;
+  tokenType: string;
+}
+
+type SignInResponseType = ApiResponse & {
+  accessToken: string;
+  tokenType: string;
+}
+
+type SignInApiResponseType = {
+  data: SignInResponseType
+}
+
 type AuthContextType = {
-  authUser: AuthUserType;
+  authCredential: AuthCrendential;
+  userProfile: UserType;
   signIn: (data: signInData) => Promise<boolean>;
   signUp: (data: signUpData) => Promise<boolean>
+  getUserProfile: () => void
 }
 
 type AuthProviderProps = {
@@ -41,18 +62,14 @@ type AuthProviderProps = {
 export const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const navigate = useNavigate();
+
   const setNotification = useContextSelector(NotificationContext, (context) => {
     return context.setNotification
   })
 
-  const [authUser, setAuthUser] = useState<AuthUserType>({} as AuthUserType)
-
-  useEffect(() => {
-    if (authUser.accessToken) {
-      const authUserJSON = JSON.stringify(authUser)
-      localStorage.setItem(AUTH_STORE_KEY, authUserJSON)
-    }
-  }, [authUser])
+  const [authCredential, setAuthCredential] = useState<AuthCrendential>({} as AuthCrendential)
+  const [userProfile, setUserProfile] = useState<UserType>({} as UserType)
 
   function showNotification(success: boolean, message: string) {
     const notificationType = success ? 'success' : 'error'
@@ -60,16 +77,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function signIn(formData: signInData): Promise<boolean> {
-    const { data } = await api.post("/auth/signin", formData)
+    const { data }: SignInApiResponseType = await api.post("/auth/signin", formData)
     const { success, message } = data;
 
     if (success) {
-      const { accessToken, tokenType, user } = data
+      const { accessToken, tokenType } = data
 
-      setAuthUser({
+      setAuthCredential({
         accessToken,
-        tokenType,
-        user
+        tokenType
       })
     }
 
@@ -84,9 +100,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return success
   }
 
+  async function getUserProfile() {
+    const { data }: UserProfileApiResponseType = await api.get("/users/profile")
+    const { success, message, user } = data
+    if (success) {
+      setUserProfile(user)
+    } else {
+      showNotification(success, message)
+      navigate('/')
+    }
+  }
+
+  useEffect(() => {
+    const auth = getAuthCrendentialsFromLocal()
+    if (auth) {
+      setAuthCredential(auth)
+    }
+  }, [])
+
+
+
+  useEffect(() => {
+    if (authCredential.accessToken) {
+      const authCredentialJSON = JSON.stringify(authCredential)
+      localStorage.setItem(AUTH_STORE_KEY, authCredentialJSON)
+    }
+  }, [authCredential])
+
   return (
     <AuthContext.Provider
-      value={{ authUser, signIn, signUp }}
+      value={{ authCredential, signIn, signUp, userProfile, getUserProfile }}
     >
       {children}
     </AuthContext.Provider>

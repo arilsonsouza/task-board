@@ -62,7 +62,7 @@ export function SignUpForm() {
       />
 
       <FormField
-        label="Usernmae"
+        label="Username"
         type="text"
         placeholder="Username"
         required

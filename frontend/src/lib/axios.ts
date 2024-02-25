@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { AUTH_STORE_KEY } from '../constans'
+import { getAuthCrendentialsFromLocal } from '../components/utils'
 
 export const DEFAULT_MESSAGE = {
   SUCCESS: 'Action taken',
@@ -61,14 +61,11 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(config => {
-  const authTokenJSON = localStorage.getItem(AUTH_STORE_KEY);
-
-  if (authTokenJSON) {
-    const auth =  JSON.parse(authTokenJSON)
-    if (auth.accessToken) {
+    const auth =  getAuthCrendentialsFromLocal()
+    if (auth) {
       config.headers.Authorization = `Bearer ${auth.accessToken}`;
     }
-  }
+
   return config;
 });
 
