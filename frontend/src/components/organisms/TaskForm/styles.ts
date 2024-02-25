@@ -13,3 +13,7 @@ export const SaveTaskButton = styled.button`
     cursor: not-allowed;
   }
 `
+
+export const DeleteTaskButton = styled(SaveTaskButton)`
+  background-color: ${({ theme }) => theme.colors.duskBlue};
+`

@@ -45,13 +45,14 @@ type TasksContextType = {
   isEditing: boolean,
   resetTask: () => void;
   editTask: (task: TaskType) => void;
-  saveTask: (data: TaskPayloadType) => Promise<boolean>
+  saveTask: (data: TaskPayloadType) => Promise<boolean>,
+  deleteTask: () => Promise<boolean>,
+  isDeleting: boolean
 }
 
 type TasksProviderProps = {
   children: ReactNode
 }
-
 
 const defaultTaskState: TaskType = {
   id: null,
@@ -64,7 +65,6 @@ const defaultTaskState: TaskType = {
 
 export const TasksContext = createContext({} as TasksContextType)
 
-
 export function TasksProvider({ children }: TasksProviderProps) {
   const setNotification = useContextSelector(NotificationContext, (context) => {
     return context.setNotification
@@ -72,6 +72,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
   const [tasks, setTasks] = useState<TaskType[]>([])
   const [task, setTask] = useState<TaskType>(defaultTaskState)
   const [isEditing, setIsEditing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   function showNotification(success: boolean, message: string) {
     const notificationType = success ? 'success' : 'error'
@@ -128,6 +129,22 @@ export function TasksProvider({ children }: TasksProviderProps) {
     return success
   }
 
+  async function deleteTask() {
+    setIsDeleting(true)
+    const { data: { success, message, task: deletedTask } }: StoreTaskApiResponseType = await api.delete(`/tasks/${task.id}`,)
+
+    setIsDeleting(false)
+
+    if (success) {
+      const updatedTasks = tasks.filter(currentTask => currentTask.id !== deletedTask.id)
+      setTasks(updatedTasks)
+      resetTask()
+    }
+    showNotification(success, message)
+
+    return success
+  }
+
 
   function resetTask() {
     setTask(() => defaultTaskState)
@@ -147,7 +164,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
   return (
     <TasksContext.Provider
-      value={{ tasks, task, isEditing, resetTask, editTask, saveTask }}
+      value={{ tasks, task, isEditing, resetTask, editTask, saveTask, deleteTask, isDeleting }}
     >
       {children}
     </TasksContext.Provider>

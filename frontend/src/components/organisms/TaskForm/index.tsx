@@ -1,20 +1,21 @@
 import { useEffect } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Controller } from 'react-hook-form'
 import { useContextSelector } from 'use-context-selector'
 import * as z from 'zod'
 
 import { FormField } from "../../molecules/FormField"
-import { zodResolver } from '@hookform/resolvers/zod'
+import { DeleteTaskButton, SaveTaskButton } from './styles'
 import { FormTextField } from '../../molecules/FormTextField'
 import { TasksContext } from '../../../contexts/TasksContext'
 import { CanceledTaskIcon } from '../../atoms/CanceledTaskIcon'
 import { CompletedTaskIcon } from '../../atoms/CompletedTaskIcon'
 import { InProgressTaskIcon } from '../../atoms/InProgressTaskIcon'
-import saveTaskButtonIcon from '../../../assets/images/Done_round.svg'
 import { TaskIconInputField } from '../../molecules/TaskIconInputField'
 import { TaskStatusInputField } from '../../molecules/TaskStatusInputField'
 
-import { SaveTaskButton } from './styles'
+import saveTaskButtonIcon from '../../../assets/images/Done_round.svg'
+import deleteTaskButtonIcon from '../../../assets/images/Trash.svg'
 
 const taskFormSchema = z.object({
   title: z.string().trim().min(1, { message: 'Task title is required' }).max(40),
@@ -26,10 +27,13 @@ const taskFormSchema = z.object({
 export type TaskFormInputs = z.infer<typeof taskFormSchema>
 
 export function TaskForm() {
-  const { task, saveTask } = useContextSelector(TasksContext, (context) => {
+  const { task, saveTask, deleteTask, isEditing, isDeleting } = useContextSelector(TasksContext, (context) => {
     return {
       task: context.task,
       saveTask: context.saveTask,
+      deleteTask: context.deleteTask,
+      isEditing: context.isEditing,
+      isDeleting: context.isDeleting
     }
   })
 
@@ -58,9 +62,8 @@ export function TaskForm() {
   const selectedStatus = watch("status")
   const selectedIcon = watch("icon")
 
-  async function handleFormSubmit(formData: TaskFormInputs) {
-    const success = await saveTask(formData)
-    if (success) {
+  function maybeReset(resetForm: boolean) {
+    if (resetForm) {
       reset({
         title: "",
         description: "",
@@ -68,6 +71,15 @@ export function TaskForm() {
         icon: "🧑🏼‍💻"
       })
     }
+  }
+  async function handleFormSubmit(formData: TaskFormInputs) {
+    const result = await saveTask(formData)
+    maybeReset(result)
+  }
+
+  async function handleDeleteTask() {
+    const result = await deleteTask()
+    maybeReset(result)
   }
 
   return (
@@ -179,6 +191,18 @@ export function TaskForm() {
       />
 
       <div className="flex justify-end gap-4 mt-3">
+
+        {isEditing &&
+          <DeleteTaskButton
+            onClick={handleDeleteTask}
+            disabled={isDeleting}
+            type='button'
+            className="flex items-center gap-2 py-2 px-6 text-white rounded-3xl text-base"
+          >
+            <span>Delete</span>
+            <img src={deleteTaskButtonIcon} alt="Delete task" />
+          </DeleteTaskButton>}
+
         <SaveTaskButton
           type='submit'
           disabled={isSubmitting}
