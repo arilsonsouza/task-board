@@ -4,13 +4,16 @@ import { NotificationContext } from "./NotificationContext";
 import { api } from "../lib/axios";
 import { ApiResponse } from "../@types/apiResponse";
 
+type TaskStatusOptions = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
+type TaskIconOptions = "🧑🏼‍💻" | "💬" | "☕" | "🏋️" | "📚" | "⏰";
+
 export type TaskType = {
-  id: number;
-  userId: number,
+  id: number | null;
+  userId: number | null,
   title: string;
   description: string;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
-  icon: string
+  status: TaskStatusOptions;
+  icon: TaskIconOptions
 }
 
 type GetTasksData = ApiResponse & {
@@ -21,25 +24,53 @@ type GetTasksApiResponseType = {
   data: GetTasksData
 }
 
+type StoreTaskData = ApiResponse & {
+  task: TaskType
+}
+
+type StoreTaskApiResponseType = {
+  data: StoreTaskData
+}
+
+type TaskPayloadType = {
+  title: string;
+  description: string;
+  icon: TaskIconOptions;
+  status: TaskStatusOptions
+}
 
 type TasksContextType = {
   tasks: TaskType[];
   task: TaskType;
-  isEditing: boolean
+  isEditing: boolean,
+  resetTask: () => void;
+  editTask: (task: TaskType) => void;
+  saveTask: (data: TaskPayloadType) => Promise<boolean>
 }
 
 type TasksProviderProps = {
   children: ReactNode
 }
 
+
+const defaultTaskState: TaskType = {
+  id: null,
+  userId: null,
+  title: "",
+  description: "",
+  status: "IN_PROGRESS",
+  icon: "🧑🏼‍💻"
+}
+
 export const TasksContext = createContext({} as TasksContextType)
+
 
 export function TasksProvider({ children }: TasksProviderProps) {
   const setNotification = useContextSelector(NotificationContext, (context) => {
     return context.setNotification
   })
   const [tasks, setTasks] = useState<TaskType[]>([])
-  const [task, setTask] = useState<TaskType>({} as TaskType)
+  const [task, setTask] = useState<TaskType>(defaultTaskState)
   const [isEditing, setIsEditing] = useState(false)
 
   function showNotification(success: boolean, message: string) {
@@ -57,6 +88,57 @@ export function TasksProvider({ children }: TasksProviderProps) {
     }
   }
 
+  async function saveTask(payload: TaskPayloadType) {
+    if (isEditing) {
+      return updateTask(payload)
+    } else {
+      return createTask(payload)
+    }
+  }
+
+  async function createTask(payload: TaskPayloadType) {
+    const { data: { success, message, task } }: StoreTaskApiResponseType = await api.post("/tasks", payload)
+
+    if (success) {
+      setTasks(state => [...state, task])
+      resetTask()
+    }
+
+    showNotification(success, message)
+
+    return success
+  }
+
+  async function updateTask(payload: TaskPayloadType) {
+    const { data: { success, message, task: updatedTask } }: StoreTaskApiResponseType = await api.put(`/tasks/${task.id}`, payload)
+
+    if (success) {
+      const updatedTasks = tasks.map(currentTask => {
+        if (currentTask.id === updatedTask.id) {
+          return updatedTask
+        }
+        return currentTask
+      })
+
+      setTasks(updatedTasks)
+      resetTask()
+    }
+    showNotification(success, message)
+
+    return success
+  }
+
+
+  function resetTask() {
+    setTask(() => defaultTaskState)
+    setIsEditing(false)
+  }
+
+  function editTask(task: TaskType) {
+    setTask(task)
+    setIsEditing(true)
+  }
+
   useEffect(() => {
     getTasks()
   }, [])
@@ -65,7 +147,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
   return (
     <TasksContext.Provider
-      value={{ tasks, task, isEditing }}
+      value={{ tasks, task, isEditing, resetTask, editTask, saveTask }}
     >
       {children}
     </TasksContext.Provider>
