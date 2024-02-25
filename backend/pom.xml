@@ -8,14 +8,26 @@
 		<version>3.2.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
+	<packaging>jar</packaging>
 	<groupId>com.aos</groupId>
 	<artifactId>task-board</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<name>task-board</name>
+
 	<description>Demo project for Spring Boot</description>
+
 	<properties>
+	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <spring.boot.maven.plugin.version>3.2.0</spring.boot.maven.plugin.version>
+    <spring.boot.dependencies.version>3.2.0</spring.boot.dependencies.version>
 		<java.version>17</java.version>
+		<image>arilson/${project.artifactId}:${project.version}</image>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -94,5 +106,44 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+				<id>build-docker-image</id>
+				<build>
+						<plugins>
+								<plugin>
+									<groupId>com.google.cloud.tools</groupId>
+									<artifactId>jib-maven-plugin</artifactId>
+									<version>3.4.0</version>
+									<configuration>
+										<from>
+											<image>openjdk:17-alpine</image>
+										</from>
+										<to>
+											<tags>
+												<tag>latest</tag>
+											</tags>
+										</to>
+										<container>
+											<ports>
+													<port>8080</port>
+											</ports>
+											<format>OCI</format>
+										</container>
+									</configuration>
+									<executions>
+										<execution>
+											<phase>package</phase>
+											<goals>
+													<goal>build</goal>
+											</goals>
+										</execution>
+									</executions>
+        				</plugin>
+						</plugins>
+				</build>
+		</profile>
+	</profiles>
 
 </project>
