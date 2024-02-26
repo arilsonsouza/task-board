@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,7 +41,14 @@ public class DefaultExceptionHandler {
   @ExceptionHandler(BadCredentialsException.class)
   public ResponseEntity<ApiResponseDTO<?>> handleException(BadCredentialsException e,
       HttpServletRequest request) {
+    ApiResponseDTO<?> apiResponse = ApiResponseDTO.error(null, "Invalid email or password");
 
+    return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ApiResponseDTO<?>> handleException(AuthenticationException e,
+      HttpServletRequest request) {
     ApiResponseDTO<?> apiResponse = ApiResponseDTO.error(null, "Invalid email or password");
 
     return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
