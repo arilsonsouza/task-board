@@ -40,11 +40,17 @@ const handleError = (err: any, MESSAGE = DEFAULT_MESSAGE.ERROR_000) => {
 
       if (data && data?.message) {
         const { message } = data
+        if (status === 403) {
+          window.location.href = '/'
+        }
         return {data: {success: false, message: message}}
       } else {
         if (status === 400) { return {success: false, message: DEFAULT_MESSAGE.ERROR_400} }
         if (status === 401) { return {success: false, message: DEFAULT_MESSAGE.ERROR_401} }
-        if (status === 403) { return {success: false, message: DEFAULT_MESSAGE.ERROR_403} }
+        if (status === 403) {
+          window.location.href = '/'
+          return { success: false, message: DEFAULT_MESSAGE.ERROR_403 }
+        }
         if (status === 404) { return {success: false, message: DEFAULT_MESSAGE.ERROR_404} }
         if (status === 422) { return {success: false, message: DEFAULT_MESSAGE.ERROR_422} }
         if (status === 429) { return {success: false, message: DEFAULT_MESSAGE.ERROR_429} }

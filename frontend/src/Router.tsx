@@ -1,8 +1,9 @@
 import { Route, Routes } from "react-router-dom";
-import { DefaultLayout } from "./components/templates/DefaultLayout";
+
+import { Tasks } from "./pages/Tasks";
 import { SignIn } from "./pages/SignIn";
 import { SignUp } from "./pages/SignUp";
-import { Tasks } from "./pages/Tasks";
+import { DefaultLayout } from "./components/templates/DefaultLayout";
 
 export function Router() {
   return (
