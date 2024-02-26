@@ -45,9 +45,10 @@ type TasksContextType = {
   isEditing: boolean,
   resetTask: () => void;
   editTask: (task: TaskType) => void;
-  saveTask: (data: TaskPayloadType) => Promise<boolean>,
-  deleteTask: () => Promise<boolean>,
-  isDeleting: boolean
+  saveTask: (data: TaskPayloadType) => Promise<boolean>;
+  deleteTask: () => Promise<boolean>;
+  isDeleting: boolean;
+  isLoadingTasks: boolean;
 }
 
 type TasksProviderProps = {
@@ -73,6 +74,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
   const [task, setTask] = useState<TaskType>(defaultTaskState)
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false)
 
   function showNotification(success: boolean, message: string) {
     const notificationType = success ? 'success' : 'error'
@@ -80,7 +82,9 @@ export function TasksProvider({ children }: TasksProviderProps) {
   }
 
   async function getTasks() {
+    setIsLoadingTasks(true)
     const { data: { success, message, tasks } }: GetTasksApiResponseType = await api.get("/tasks")
+    setIsLoadingTasks(false)
 
     if (!success) {
       showNotification(success, message)
@@ -164,7 +168,17 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
   return (
     <TasksContext.Provider
-      value={{ tasks, task, isEditing, resetTask, editTask, saveTask, deleteTask, isDeleting }}
+      value={{
+        tasks,
+        task,
+        isEditing,
+        resetTask,
+        editTask,
+        saveTask,
+        deleteTask,
+        isDeleting,
+        isLoadingTasks
+      }}
     >
       {children}
     </TasksContext.Provider>
